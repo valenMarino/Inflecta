@@ -12,7 +12,7 @@ Luego instala las dependencias desde el notebook o manualmente con pip.
 
 # RAG Fine-Tuning: Procesamiento y Búsqueda Semántica en PDFs
 
-Este proyecto permite extraer texto de archivos PDF (incluyendo escaneados mediante OCR), generar embeddings semánticos multilenguaje y realizar búsquedas inteligentes sobre el contenido. Está orientado a experimentos de Retrieval-Augmented Generation (RAG) y utiliza modelos ligeros compatibles con Ollama.
+Este proyecto permite extraer texto de archivos PDF (incluyendo escaneados mediante OCR), generar embeddings semánticos multilenguaje y realizar búsquedas inteligentes sobre el contenido. Está orientado a experimentos de Retrieval-Augmented Generation (RAG).
 
 ## Características principales
 - Procesamiento de PDFs, incluyendo imágenes escaneadas (OCR con Tesseract).
@@ -22,7 +22,7 @@ Este proyecto permite extraer texto de archivos PDF (incluyendo escaneados media
 
 ## Estructura del proyecto
 - `Notebook.ipynb`: Notebook principal con todo el flujo de procesamiento, vectorización e indexación.
-- `pdfs/`: Carpeta donde colocar los archivos PDF a procesar. Incluye un PDF de ejemplo: **MS-15B1_v1.0_English.pdf** (manual de notebook).
+- `pdfs/`: Carpeta donde colocar los archivos PDF a procesar.
 - `poppler/` y `tesseract/`: Incluyen instaladores y binarios necesarios para manipular PDFs y realizar OCR en Windows.
 - `faiss_index.bin`, `embeddings.npy`, `chunks.pkl`: Archivos generados tras el procesamiento, contienen el índice, los embeddings y los textos segmentados.
 
@@ -43,7 +43,6 @@ Este proyecto permite extraer texto de archivos PDF (incluyendo escaneados media
 4. Los resultados se guardan automáticamente para uso posterior.
 
 ## Herramientas incluidas
-- **PDF de ejemplo:** `pdfs/MS-15B1_v1.0_English.pdf` (manual de notebook para pruebas).
 - **Poppler:** Binarios en `poppler/bin/` para manipulación de PDFs (requerido por `pdf2image`).
 - **Tesseract:** Binarios y ejecutable en `tesseract/` para OCR de imágenes.
 
