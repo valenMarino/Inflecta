@@ -9,12 +9,12 @@ from dotenv import load_dotenv
 # -------------------------------
 # CONFIGURACIÓN
 # -------------------------------
-BASE_DIR = "C:/Users/Usuario/Desktop/cursos_repos/rag-finetunning"
+BASE_DIR = "C:/Users/Usuario/Desktop/cursos_repos/Inflecta"
 INDEX_PATH = os.path.join(BASE_DIR, "faiss_index.bin")
 CHUNKS_PATH = os.path.join(BASE_DIR, "chunks.pkl")
 
 # Embeddings
-MODEL_NAME = "sentence-transformers/distiluse-base-multilingual-cased-v2"
+MODEL_NAME = "paraphrase-multilingual-mpnet-base-v2"
 
 # Cliente OpenAI (usa tu API key en variable de entorno OPENAI_API_KEY)
 load_dotenv()
@@ -48,34 +48,38 @@ def buscar_respuesta(pregunta, k=3):
     return resultados
 
 # -------------------------------
-# GPT CON RAG
+# GPT CON RAG Y CONTEXTO
 # -------------------------------
-def generar_respuesta(pregunta, contexto):
-    prompt = f"""
-    Responde en español a la siguiente pregunta basándote en el contexto dado.
-    Si el contexto no tiene la información suficiente, indícalo claramente.
-
-    Pregunta: {pregunta}
-
-    Contexto:
-    {contexto}
-    """
+def generar_respuesta(pregunta, contexto, historial):
+    # Agregamos la pregunta actual con su contexto al historial
+    historial.append({"role": "user", "content": f"{pregunta}\n\nContexto:\n{contexto}"})
 
     response = client.chat.completions.create(
-        model="gpt-4o-mini",  # puedes cambiar por gpt-4.1, gpt-3.5, etc.
+        model="gpt-4o-mini",
         messages=[
-            {"role": "system", "content": "Eres un asistente útil que responde SIEMPRE en español."},
-            {"role": "user", "content": prompt}
+            {"role": "system", "content": "Eres un asistente útil que responde SIEMPRE en español y basado solo en el contexto dado."},
+            *historial  # enviamos todo el historial acumulado
         ],
         temperature=0.3
     )
-    return response.choices[0].message.content.strip()
+
+    respuesta = response.choices[0].message.content.strip()
+    historial.append({"role": "assistant", "content": respuesta})  # guardamos la respuesta también
+
+    # Evitar que el historial crezca demasiado
+    if len(historial) > 10:
+        historial = historial[-10:]
+
+    return respuesta, historial
 
 # -------------------------------
 # LOOP PRINCIPAL
 # -------------------------------
 def main():
     print("Chatbot RAG - Pregunta lo que quieras sobre tus PDFs (escribe 'salir' para terminar)")
+
+    historial = []  # memoria temporal de la conversación
+
     while True:
         try:
             pregunta = input("\nTu pregunta: ")
@@ -87,12 +91,13 @@ def main():
             print("¡Hasta luego!")
             break
 
-        # Buscar chunks
+        # Buscar chunks relevantes
         respuestas = buscar_respuesta(pregunta)
         contexto = "\n\n".join(respuestas)
 
-        # Pasar a GPT
-        respuesta_final = generar_respuesta(pregunta, contexto)
+        # Generar respuesta con memoria
+        respuesta_final, historial = generar_respuesta(pregunta, contexto, historial)
+
         print("\n📝 Respuesta del asistente:")
         print(respuesta_final)
 
