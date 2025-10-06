@@ -44,7 +44,14 @@ with open(CHUNKS_PATH, "rb") as f:
 def buscar_respuesta(pregunta, k=3):
     pregunta_vec = embedder.encode([pregunta], convert_to_numpy=True)
     D, I = index.search(pregunta_vec, k)
-    resultados = [all_chunks[i] for i in I[0]]
+    resultados = []
+    for i in I[0]:
+        chunk = all_chunks[i]
+        # soportar lista de strings o lista de dicts con metadatos
+        if isinstance(chunk, dict):
+            resultados.append(chunk.get('text_with_context', chunk.get('text', '')))
+        else:
+            resultados.append(chunk)
     return resultados
 
 # -------------------------------
